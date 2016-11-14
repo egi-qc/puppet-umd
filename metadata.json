@@ -1,0 +1,30 @@
+{
+  "name": "umd",
+  "version": "0.1.0",
+  "author": "Pablo Orviz",
+  "license": "Apache-2.0",
+  "summary": "Puppet module for the UMD product verification process",
+  "source": "https://github.com/egi-qc/puppet-umd",
+  "project_page": "https://github.com/egi-qc/puppet-umd",
+  "issues_url": "https://github.com/egi-qc/puppet-umd/issues",
+  "tags": ["umd"],
+  "operatingsystem_support": [
+    {
+      "operatingsystem":"RedHat",
+      "operatingsystemrelease": [
+        "6"
+        "7"
+      ]
+    },
+    {
+      "operatingsystem": "Ubuntu",
+      "operatingsystemrelease": [ 
+        "14.04",
+     ]
+    }
+  ],
+  "dependencies": [
+    { "name": "puppetlabs/stdlib" },
+    { "name": "puppetlabs/apt" },
+  ]
+}
