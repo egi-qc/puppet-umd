@@ -1,1 +1,1 @@
-class {"umd::repo::verification":}
+class {"umd::verification":}

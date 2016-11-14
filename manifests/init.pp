@@ -1,23 +1,23 @@
-class umd::repo::verification {
-    $verification_repofile = hiera("umd::repo::verification::repofile")
+class umd inherits umd::params {
+    include umd::release
+    include umd::verification
+}
+
+class umd::release {
+    if $::operatingsystem in ["RedHat"] {
+        package {
+            ["epel-release", "yum-priorities"]:
+                ensure => latest,
+    }
+
+}
+
+class umd::verification {
+    $verification_repofile = hiera("umd::verification::repofile")
+    info("UMD verification repository defined: $verification_repofile")
 
     if $verification_repofile {
-        info("UMD verification repository defined: $verification_repofile")
-
-        if $::osfamily in ["Debian"] {
-            $repo_sources_dir = "/etc/apt/sources.list.d/"
-            apt::key {
-                "wtf":
-                    id => "FD7011F31EBF9470B82FAFCDE2E992EB352D3E14",
-                    source => "http://repository.egi.eu/sw/production/umd/UMD-DEB-PGP-KEY",
-            }
-        }
-        elsif $::osfamily in ["RedHat", "CentOS"] {
-            $repo_sources_dir = "/etc/yum.repos.d/"
-        }
-        info("Repository source directory: $repo_sources_dir")
-
-        umd::repo::download {
+        umd::download {
             $verification_repofile:
                 target => $repo_sources_dir,
         }
@@ -27,7 +27,7 @@ class umd::repo::verification {
     }
 }
 
-define umd::repo::download ($target) {
+define umd::download ($target) {
     package {
         "wget":
             ensure => installed
