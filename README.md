@@ -7,6 +7,7 @@ validation.
 
     wget https://github.com/egi-qc/puppet-umd/archive/master.zip -O /tmp/puppet-umd-<VERSION>.tar.gz
     puppet module install --ignore-dependencies /tmp/puppet-umd-<VERSION>.tar.gz
+    puppet module install puppetlabs/stdlib
 
 ## Usage
 
