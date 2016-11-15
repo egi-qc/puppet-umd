@@ -1,6 +1,7 @@
 class umd (
-        $release,
-        $openstack_release = undef
+        $release               = $umd::release,
+        $verification_repofile = $umd::params::verification_repofile,
+        $openstack_release     = $umd::params::openstack_release,
     ) inherits umd::params {
         class {
             "umd::release":
@@ -34,7 +35,7 @@ class umd::release (
                 "umd-release":
                     provider => "rpm",
                     ensure   => installed,
-                    source   => "${umd::params::release[$release][centos7]}",
+                    source   => "${umd::params::release_map[$release][centos7]}",
                     require  => Package["yum-plugin-priorities"]
             }
             if $openstack_release {
@@ -53,7 +54,7 @@ class umd::release (
                 "umd-release":
                     provider => "rpm",
                     ensure   => installed,
-                    source   => "${umd::params::release[$release][sl6]}",
+                    source   => "${umd::params::release_map[$release][sl6]}",
                     require  => Package["yum-priorities"]
             }
         }
@@ -66,7 +67,7 @@ class umd::release (
                 "umd-release":
                     provider => "rpm",
                     ensure   => installed,
-                    source   => "${umd::params::release[$release][sl5]}",
+                    source   => "${umd::params::release_map[$release][sl5]}",
                     require  => Package["yum-priorities"]
             }
         }
@@ -90,14 +91,12 @@ class umd::release (
 }
 
 class umd::verification {
-    $verification_repofile = hiera("umd::verification::repofile")
-    info("UMD verification repository defined: $verification_repofile")
-
-    if $verification_repofile {
+    if $umd::verification_repofile {
         umd::download {
-            $verification_repofile:
+            $umd::verification_repofile:
                 target => $umd::params::repo_sources_dir,
         }
+        info("UMD verification repository retrieved: $umd::verification_repofile")
     }
     else {
         notice("UMD verification repository not defined!")
