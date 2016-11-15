@@ -20,15 +20,22 @@ class umd::release (
 
         if $::osfamily in ["RedHat"] {
             package {
-                ["epel-release", "yum-priorities"]:
+                "epel-release":
                     ensure => latest,
             }
         }
         
         if $::operatingsystem == "CentOS" and $::operatingsystemmajrelease == "7" {
             package {
-                "${umd::params::release[$release][centos7]}":
+                "yum-plugin-priorities":
                     ensure => installed
+            }
+            package {
+                "umd-release":
+                    provider => "rpm",
+                    ensure   => installed,
+                    source   => "${umd::params::release[$release][centos7]}",
+                    require  => Package["yum-plugin-priorities"]
             }
             if $openstack_release {
                 package {
@@ -39,14 +46,28 @@ class umd::release (
         }
         elsif $::operatingsystem == "Scientific" and $::operatingsystemmajrelease == "6" {
             package {
-                "${umd::params::release[$release][sl6]}":
+                "yum-priorities":
                     ensure => installed
+            }
+            package {
+                "umd-release":
+                    provider => "rpm",
+                    ensure   => installed,
+                    source   => "${umd::params::release[$release][sl6]}",
+                    require  => Package["yum-priorities"]
             }
         }
         elsif $::operatingsystem == "Scientific" and $::operatingsystemmajrelease == "5" {
             package {
-                "${umd::params::release[$release][sl5]}":
+                "yum-priorities":
                     ensure => installed
+            }
+            package {
+                "umd-release":
+                    provider => "rpm",
+                    ensure   => installed,
+                    source   => "${umd::params::release[$release][sl5]}",
+                    require  => Package["yum-priorities"]
             }
         }
         elsif $::operatingsystem == "Ubuntu" and $::operatingsystemrelease == "14.04" {
