@@ -16,6 +16,6 @@ class umd::params {
     }
 
     $release               = hiera("umd::release", 4)
-    $verification_repofile = hiera("umd::verification::repofile", undef)
+    $verification_repofile = hiera("umd::verification_repofile", undef)
     $openstack_release     = hiera("umd::openstack_release", undef)
 }

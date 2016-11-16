@@ -1,5 +1,5 @@
 class umd (
-        $release               = $umd::release,
+        $release               = $umd::params::release,
         $verification_repofile = $umd::params::verification_repofile,
         $openstack_release     = $umd::params::openstack_release,
     ) inherits umd::params {
