@@ -27,6 +27,13 @@ class umd::release (
         }
         
         if $::operatingsystem == "CentOS" and $::operatingsystemmajrelease == "7" {
+            if $release == "4" {
+                $pkg = "${umd::params::release_map[4][centos7]}"
+            }
+            elsif $release == "3" {
+                $pkg = "${umd::params::release_map[3][centos7]}"
+            }
+
             package {
                 "yum-plugin-priorities":
                     ensure => installed
@@ -35,7 +42,7 @@ class umd::release (
                 "umd-release":
                     provider => "rpm",
                     ensure   => installed,
-                    source   => "${umd::params::release_map[$release][centos7]}",
+                    source   => $pkg,
                     require  => Package["yum-plugin-priorities"]
             }
             if $openstack_release {
@@ -46,6 +53,13 @@ class umd::release (
             }
         }
         elsif $::operatingsystem == "Scientific" and $::operatingsystemmajrelease == "6" {
+            if $release == "4" {
+                $pkg = "${umd::params::release_map[4][sl6]}"
+            }
+            elsif $release == "3" {
+                $pkg = "${umd::params::release_map[3][sl6]}"
+            }
+
             package {
                 "yum-priorities":
                     ensure => installed
@@ -54,7 +68,7 @@ class umd::release (
                 "umd-release":
                     provider => "rpm",
                     ensure   => installed,
-                    source   => "${umd::params::release_map[$release][sl6]}",
+                    source   => "$pkg",
                     require  => Package["yum-priorities"]
             }
         }
@@ -67,7 +81,7 @@ class umd::release (
                 "umd-release":
                     provider => "rpm",
                     ensure   => installed,
-                    source   => "${umd::params::release_map[$release][sl5]}",
+                    source   => "${umd::params::release_map[3][sl5]}",
                     require  => Package["yum-priorities"]
             }
         }
