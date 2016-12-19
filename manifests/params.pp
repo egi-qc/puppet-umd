@@ -15,7 +15,7 @@ class umd::params {
         $repo_sources_dir = "/etc/yum.repos.d/"
     }
 
-    $release               = hiera("umd::release", 4)
+    $distribution          = hiera("umd::distribution", undef)
+    $release               = hiera("umd::release", undef)
     $verification_repofile = hiera("umd::verification_repofile", undef)
-    $openstack_release     = hiera("umd::openstack_release", undef)
 }

@@ -1,31 +1,72 @@
 class umd (
+        $distribution          = $umd::params::distribution,
         $release               = $umd::params::release,
         $verification_repofile = $umd::params::verification_repofile,
-        $openstack_release     = $umd::params::openstack_release,
     ) inherits umd::params {
-        class {
-            "umd::release":
-                release => $release,
-                openstack_release => $openstack_release,
+        if $distribution == "cmd" {
+            class {
+                "umd::distro::cmd":
+                    release           => $release,
+            }
+            include umd::verification::repo
         }
-        include umd::verification
+        elsif $distribution == "umd" {
+            class {
+                "umd::distro:umd":
+                    release => $release,
+            }
+            include umd::verification::repo
+        }
+        else {
+            fail("UMD distribution '${distribution}' not known!")
+        }
 }
 
-class umd::release (
+class umd::distro::cmd (
         $release,
-        $openstack_release = undef
     ) {
-        if ! ($openstack_release in ["mitaka"]) {
-            fail("OpenStack release ${openstack_release} not supported!")
+        if $release == 1 {
+            openstack_release = "mitaka"
+        }
+        else {
+            fail("CMD release '${release}' not supported!")
         }
 
+        if $::operatingsystem == "CentOS" and $::operatingsystemmajrelease == "7" {
+            package {
+                "centos-release-openstack-${openstack_release}":
+                    ensure => installed
+            }
+        } 
+        elsif $::operatingsystem == "Ubuntu" and $::operatingsystemrelease == "14.04" {
+            if $openstack_release {
+                package {
+                    "software-properties-common":
+                        ensure => installed,
+                }
+                exec {
+                    "add cloud-archive:${openstack_release} repository":
+                        command => "/usr/bin/add-apt-repository -y cloud-archive:${openstack_release}",
+                        creates => "${umd::params::repo_sources_dir}/cloudarchive-${openstack_release}.list",
+                        require => Package["software-properties-common"]
+                }
+            }
+        }
+        else {
+            fail("Operating system ($::operatingsystem, $::operatingsystemrelease) not supported!")
+        }
+}
+
+class umd::distro:umd (
+        $release,
+    ) {
         if $::osfamily in ["RedHat"] {
             package {
                 "epel-release":
                     ensure => latest,
             }
         }
-        
+  
         if $::operatingsystem == "CentOS" and $::operatingsystemmajrelease == "7" {
             if $release == "4" {
                 $pkg = "${umd::params::release_map[4][centos7]}"
@@ -44,12 +85,6 @@ class umd::release (
                     ensure   => installed,
                     source   => $pkg,
                     require  => Package["yum-plugin-priorities"]
-            }
-            if $openstack_release {
-                package {
-                    "centos-release-openstack-${openstack_release}":
-                        ensure => installed
-                }
             }
         }
         elsif $::operatingsystem == "Scientific" and $::operatingsystemmajrelease == "6" {
@@ -85,26 +120,12 @@ class umd::release (
                     require  => Package["yum-priorities"]
             }
         }
-        elsif $::operatingsystem == "Ubuntu" and $::operatingsystemrelease == "14.04" {
-            if $openstack_release {
-                package {
-                    "software-properties-common":
-                        ensure => installed,
-                }
-                exec {
-                    "add cloud-archive:${openstack_release} repository":
-                        command => "/usr/bin/add-apt-repository -y cloud-archive:${openstack_release}",
-                        creates => "${umd::params::repo_sources_dir}/cloudarchive-${openstack_release}.list",
-                        require => Package["software-properties-common"]
-                }
-            }
-        }
         else {
             fail("Operating system ${::operatingsystem} (release: ${::operatingsystemrelease} not supported!")
         }
 }
 
-class umd::verification {
+class umd::verification::repo {
     if $umd::verification_repofile {
         umd::download {
             $umd::verification_repofile:
