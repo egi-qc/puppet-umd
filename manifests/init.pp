@@ -26,7 +26,7 @@ class umd::distro::cmd (
         $release,
     ) {
         if $release == 1 {
-            openstack_release = "mitaka"
+            $openstack_release = "mitaka"
         }
         else {
             fail("CMD release '${release}' not supported!")
@@ -57,7 +57,7 @@ class umd::distro::cmd (
         }
 }
 
-class umd::distro:umd (
+class umd::distro::umd (
         $release,
     ) {
         if $::osfamily in ["RedHat"] {
