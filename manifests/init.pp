@@ -12,7 +12,7 @@ class umd (
         }
         elsif $distribution == "umd" {
             class {
-                "umd::distro:umd":
+                "umd::distro::umd":
                     release => $release,
             }
             include umd::verification::repo
