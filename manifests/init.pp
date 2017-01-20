@@ -139,9 +139,11 @@ class umd::verification::repo {
 }
 
 define umd::download ($target) {
-    package {
-        "wget":
-            ensure => installed
+    if ! defined(Package["wget"]) {
+        package {
+            "wget":
+                ensure => installed
+        }
     }
 
     $fname = basename($name)
