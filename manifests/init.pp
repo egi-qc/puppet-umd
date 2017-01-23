@@ -25,11 +25,11 @@ class umd (
         if $igtf_repo {
             if $::osfamily in ["Debian"] {
                 include umd::igtf_repo::apt
-                $req = Class[Umd::igtf_repo::apt]
+                $req = Class["Umd::igtf_repo::apt"]
             }
             elsif $::osfamily in ["RedHat", "CentOS"] {
                 include umd::igtf_repo::yum
-                $req = Class[Umd::igtf_repo::yum]
+                $req = Class["Umd::igtf_repo::yum"]
             }
             
             package {
