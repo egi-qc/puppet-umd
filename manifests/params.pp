@@ -1,4 +1,9 @@
 class umd::params {
+    $distribution          = hiera("umd::distribution", undef)
+    $release               = hiera("umd::release", undef)
+    $verification_repofile = hiera("umd::verification_repofile", undef)
+    $igtf_repo             = hiera("umd::igtf_repo", undef)
+
     $release_map = {
         4 => {
             centos7 => "http://repository.egi.eu/sw/production/umd/4/centos7/x86_64/updates/umd-release-4.1.2-1.el7.centos.noarch.rpm",
@@ -14,8 +19,4 @@ class umd::params {
     elsif $::osfamily in ["RedHat", "CentOS"] {
         $repo_sources_dir = "/etc/yum.repos.d/"
     }
-
-    $distribution          = hiera("umd::distribution", undef)
-    $release               = hiera("umd::release", undef)
-    $verification_repofile = hiera("umd::verification_repofile", undef)
 }

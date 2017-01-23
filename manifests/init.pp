@@ -2,6 +2,7 @@ class umd (
         $distribution          = $umd::params::distribution,
         $release               = $umd::params::release,
         $verification_repofile = $umd::params::verification_repofile,
+        $igtf_repo             = $umd::params::igtf_repo,
     ) inherits umd::params {
         if $distribution == "cmd" {
             class {
@@ -19,6 +20,15 @@ class umd (
         }
         else {
             fail("UMD distribution '${distribution}' not known!")
+        }
+        
+        if $igtf_repo {
+            if $::osfamily in ["Debian"] {
+                include umd::igtf_repo::apt
+            }
+            elsif $::osfamily in ["RedHat", "CentOS"] {
+                include umd::igtf_repo::yum
+            }
         }
 }
 
