@@ -83,6 +83,11 @@ class umd::distro::umd (
                 "epel-release":
                     ensure => latest,
             }
+            
+            package {
+                "yum-plugin-priorities":
+                    ensure => installed
+            }
         }
   
         if $::operatingsystem == "CentOS" and $::operatingsystemmajrelease == "7" {
@@ -93,10 +98,6 @@ class umd::distro::umd (
                 $pkg = "${umd::params::release_map[3][centos7]}"
             }
 
-            package {
-                "yum-plugin-priorities":
-                    ensure => installed
-            }
             package {
                 "umd-release":
                     provider => "rpm",
@@ -114,15 +115,11 @@ class umd::distro::umd (
             }
 
             package {
-                "yum-priorities":
-                    ensure => installed
-            }
-            package {
                 "umd-release":
                     provider => "rpm",
                     ensure   => installed,
                     source   => "$pkg",
-                    require  => Package["yum-priorities"]
+                    require  => Package["yum-plugin-priorities"]
             }
         }
         elsif $::operatingsystem == "Scientific" and $::operatingsystemmajrelease == "5" {
