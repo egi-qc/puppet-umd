@@ -9,19 +9,17 @@ class umd (
                 "umd::distro::cmd":
                     release           => $release,
             }
-            include umd::verification::repo
         }
         elsif $distribution == "umd" {
             class {
                 "umd::distro::umd":
                     release => $release,
             }
-            include umd::verification::repo
         }
         else {
             fail("UMD distribution '${distribution}' not known!")
         }
-        
+
         if $igtf_repo {
             if $::osfamily in ["Debian"] {
                 include umd::igtf_repo::apt
@@ -38,6 +36,8 @@ class umd (
                     require => $req, 
             }
         }
+        
+        include umd::verification::repo
 }
 
 class umd::distro::cmd (
@@ -141,10 +141,29 @@ class umd::distro::umd (
 }
 
 class umd::verification::repo {
+    if $::osfamily in ["Debian"] {
+       exec { 
+           "apt-get update":
+               command => "/usr/bin/apt-get update",
+               onlyif => "/bin/sh -c '[ ! -f /var/cache/apt/pkgcache.bin ] || /usr/bin/find /etc/apt/* -cnewer /var/cache/apt/pkgcache.bin | /bin/grep . > /dev/null'",
+        } 
+        $update_cache = "apt-get update"
+    }
+    elsif $::osfamily in ["RedHat", "CentOS"] {
+        exec {
+            "/usr/bin/yum makecache fast":
+                user        => "root",
+                timeout     => 600,
+                refreshonly => true;
+        }
+        $update_cache = "/usr/bin/yum makecache fast"
+    }
+        
     if $umd::verification_repofile {
         umd::download {
             $umd::verification_repofile:
                 target => $umd::params::repo_sources_dir,
+                notify => Exec[$update_cache]
         }
         info("UMD verification repository retrieved: $umd::verification_repofile")
     }
