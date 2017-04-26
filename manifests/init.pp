@@ -56,7 +56,7 @@ class umd::distro::cmd (
                     ensure => installed
             }
         } 
-        elsif $::operatingsystem == "Ubuntu" and $::operatingsystemrelease == "14.04" {
+        elsif $::operatingsystem == "Ubuntu" and $::operatingsystemrelease in ["14.04", "16.04"] {
             if $openstack_release {
                 package {
                     "software-properties-common":
