@@ -2,7 +2,7 @@ class umd::params {
     $distribution          = hiera("umd::distribution", undef)
     $release               = hiera("umd::release", undef)
     $verification_repofile = hiera("umd::verification_repofile", undef)
-    $igtf_repo             = hiera("umd::igtf_repo", undef)
+    $igtf_repo             = hiera("umd::igtf_repo", True)
 
     $release_map = {
         4 => {
