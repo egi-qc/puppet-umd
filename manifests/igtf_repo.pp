@@ -3,7 +3,8 @@ class umd::igtf_repo::yum {
         "EGI-trustanchors":
             baseurl  => 'http://repository.egi.eu/sw/production/cas/1/current/',
             descr    => "EGI-trustanchors repo",
-            gpgcheck => 0,
+            gpgcheck => 1,
+            gpgkey   => "http://repository.egi.eu/sw/production/cas/1/GPG-KEY-EUGridPMA-RPM-3",
             enabled  => 1,
             protect  => 0,
     }
