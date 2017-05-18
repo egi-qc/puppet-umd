@@ -141,25 +141,31 @@ class umd::distro::umd (
 }
 
 class umd::verification::repo {
-    if $::osfamily in ["Debian"] {
-       exec { 
-           "apt-get update":
-               command => "/usr/bin/apt-get update",
-               onlyif => "/bin/sh -c '[ ! -f /var/cache/apt/pkgcache.bin ] || /usr/bin/find /etc/apt/* -cnewer /var/cache/apt/pkgcache.bin | /bin/grep . > /dev/null'",
-        } 
-        $update_cache = "apt-get update"
-    }
-    elsif $::osfamily in ["RedHat", "CentOS"] {
-        exec {
-            "/usr/bin/yum makecache fast":
-                user        => "root",
-                timeout     => 600,
-                refreshonly => true;
-        }
-        $update_cache = "/usr/bin/yum makecache fast"
-    }
-        
     if $umd::verification_repofile {
+        if $::osfamily in ["Debian"] {
+           apt::key {
+               "EUGridPMA":
+                   source => "http://repository.egi.eu/sw/production/umd/UMD-DEB-PGP-KEY", 
+                   id     => "FD7011F31EBF9470B82FAFCDE2E992EB352D3E14",
+           }
+
+           exec { 
+               "apt-get update":
+                   command => "/usr/bin/apt-get update",
+                   onlyif => "/bin/sh -c '[ ! -f /var/cache/apt/pkgcache.bin ] || /usr/bin/find /etc/apt/* -cnewer /var/cache/apt/pkgcache.bin | /bin/grep . > /dev/null'",
+            } 
+            $update_cache = "apt-get update"
+        }
+        elsif $::osfamily in ["RedHat", "CentOS"] {
+            exec {
+                "/usr/bin/yum makecache fast":
+                    user        => "root",
+                    timeout     => 600,
+                    refreshonly => true;
+            }
+            $update_cache = "/usr/bin/yum makecache fast"
+        }
+
         umd::download {
             $umd::verification_repofile:
                 target => $umd::params::repo_sources_dir,
