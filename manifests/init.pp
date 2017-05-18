@@ -55,9 +55,9 @@ class umd::distro::cmd (
                 "centos-release-openstack-${openstack_release}":
                     ensure => installed
             }
-        } 
+        }
         elsif $::operatingsystem == "Ubuntu" and $::operatingsystemrelease in ["14.04", "16.04"] {
-            if $openstack_release {
+            if $openstack_release != "mitaka" {
                 package {
                     "software-properties-common":
                         ensure => installed,
