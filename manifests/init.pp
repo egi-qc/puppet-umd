@@ -37,7 +37,7 @@ class umd (
             }
         }
         
-        include umd::verification::repo
+        contain umd::verification::repo
 }
 
 class umd::distro::cmd (
