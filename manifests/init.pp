@@ -26,6 +26,10 @@ class umd (
                 $req = Class["Umd::igtf_repo::apt"]
             }
             elsif $::osfamily in ["RedHat", "CentOS"] {
+                package {
+                    "yum-utils":
+                        ensure => installed,
+                }
                 include umd::igtf_repo::yum
                 $req = Class["Umd::igtf_repo::yum"]
             }
@@ -37,12 +41,15 @@ class umd (
             }
         }
 
-        if $untested_repo {
-            package {
-                "yum-utils":
-                    ensure => installed,
+        if $enable_testing_repo {
+            exec {
+                "Enable UMD testing repository":
+                    command => "/usr/bin/yum-config-manager --enable *MD-*-testing",
+                    require => Package["yum-utils"]
             }
-            
+        }
+
+        if $enable_untested_repo {
             exec {
                 "Enable UMD untested repository":
                     command => "/usr/bin/yum-config-manager --enable *MD-*-untested",
