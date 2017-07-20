@@ -36,6 +36,19 @@ class umd (
                     require => $req, 
             }
         }
+
+        if $untested_repo {
+            package {
+                "yum-utils":
+                    ensure => installed,
+            }
+            
+            exec {
+                "Enable UMD untested repository":
+                    command => "/usr/bin/yum-config-manager --enable *MD-*-untested",
+                    require => Package["yum-utils"]
+            }
+        }
         
         contain umd::verification::repo
 }

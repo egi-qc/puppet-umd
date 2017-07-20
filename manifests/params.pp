@@ -3,6 +3,7 @@ class umd::params {
     $release               = hiera("umd::release", undef)
     $verification_repofile = hiera("umd::verification_repofile", undef)
     $igtf_repo             = hiera("umd::igtf_repo", True)
+    $untested_repo         = hiera("umd::untested_repo", False)
 
     $release_map = {
         4 => {
