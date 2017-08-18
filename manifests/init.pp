@@ -23,37 +23,43 @@ class umd (
         if $igtf_repo {
             if $::osfamily in ["Debian"] {
                 include umd::igtf_repo::apt
-                $req = Class["Umd::igtf_repo::apt"]
+                $req_igtf = Class["Umd::igtf_repo::apt"]
             }
             elsif $::osfamily in ["RedHat", "CentOS"] {
                 package {
                     "yum-utils":
                         ensure => installed,
                 }
+		$req = Package["yum-utils"]
+
                 include umd::igtf_repo::yum
-                $req = Class["Umd::igtf_repo::yum"]
+                $req_igtf = Class["Umd::igtf_repo::yum"]
             }
             
             package {
                 "ca-policy-egi-core":
                     ensure  => latest,
-                    require => $req, 
+                    require => $req_igtf, 
             }
         }
 
         if $enable_testing_repo {
-            exec {
-                "Enable UMD testing repository":
-                    command => "/usr/bin/yum-config-manager --enable *MD-*-testing",
-                    require => Package["yum-utils"]
+            if $::osfamily in ["RedHat", "CentOS"] {
+                exec {
+                    "Enable UMD testing repository":
+                        command => "/usr/bin/yum-config-manager --enable *MD-*-testing",
+                        require => $req
+                }
             }
         }
 
         if $enable_untested_repo {
-            exec {
-                "Enable UMD untested repository":
-                    command => "/usr/bin/yum-config-manager --enable *MD-*-untested",
-                    require => Package["yum-utils"]
+            if $::osfamily in ["RedHat", "CentOS"] {
+                exec {
+                    "Enable UMD untested repository":
+                        command => "/usr/bin/yum-config-manager --enable *MD-*-untested",
+                        require => $req
+                }
             }
         }
         
