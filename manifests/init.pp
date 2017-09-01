@@ -1,20 +1,15 @@
 class umd (
         $distribution          = $umd::params::distribution,
-        $release               = $umd::params::release,
         $verification_repofile = $umd::params::verification_repofile,
         $igtf_repo             = $umd::params::igtf_repo,
     ) inherits umd::params {
         if $distribution == "cmd" {
-            class {
-                "umd::distro::cmd":
-                    release           => $release,
-            }
+            contain umd::distro::cmd
+            $req_release = Class["umd::distro::cmd"]
         }
         elsif $distribution == "umd" {
-            class {
-                "umd::distro::umd":
-                    release => $release,
-            }
+            contain umd::distro::umd
+            $req_release = Class["umd::distro::umd"]
         }
         else {
             fail("UMD distribution '${distribution}' not known!")
@@ -48,7 +43,7 @@ class umd (
                 exec {
                     "Enable UMD testing repository":
                         command => "/usr/bin/yum-config-manager --enable *MD-*-testing",
-                        require => $req
+                        require => [$req, $req_release]
                 }
             }
         }
@@ -58,7 +53,7 @@ class umd (
                 exec {
                     "Enable UMD untested repository":
                         command => "/usr/bin/yum-config-manager --enable *MD-*-untested",
-                        require => $req
+                        require => [$req, $req_release]
                 }
             }
         }
@@ -66,14 +61,12 @@ class umd (
         contain umd::verification::repo
 }
 
-class umd::distro::cmd (
-        $release,
-    ) {
-        if $release == 1 {
+class umd::distro::cmd {
+        if $umd::params::release == 1 {
             $openstack_release = "mitaka"
         }
         else {
-            fail("CMD release '${release}' not supported!")
+            fail("CMD release '${umd::params::release}' not supported!")
         }
 
         if $::operatingsystem == "CentOS" and $::operatingsystemmajrelease == "7" {
@@ -101,9 +94,7 @@ class umd::distro::cmd (
         }
 }
 
-class umd::distro::umd (
-        $release,
-    ) {
+class umd::distro::umd {
         if $::osfamily in ["RedHat"] {
             package {
                 "epel-release":
@@ -117,10 +108,10 @@ class umd::distro::umd (
         }
   
         if $::operatingsystem == "CentOS" and $::operatingsystemmajrelease == "7" {
-            if $release == "4" {
+            if $umd::params::release == "4" {
                 $pkg = "${umd::params::release_map[4][centos7]}"
             }
-            elsif $release == "3" {
+            elsif $umd::params::release == "3" {
                 $pkg = "${umd::params::release_map[3][centos7]}"
             }
 
@@ -133,10 +124,10 @@ class umd::distro::umd (
             }
         }
         elsif $::operatingsystem == "Scientific" and $::operatingsystemmajrelease == "6" {
-            if $release == "4" {
+            if $umd::params::release == "4" {
                 $pkg = "${umd::params::release_map[4][sl6]}"
             }
-            elsif $release == "3" {
+            elsif $umd::params::release == "3" {
                 $pkg = "${umd::params::release_map[3][sl6]}"
             }
 
