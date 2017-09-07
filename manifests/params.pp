@@ -2,9 +2,9 @@ class umd::params {
     $distribution          = hiera("umd::distribution", undef)
     $release               = hiera("umd::release", undef)
     $verification_repofile = hiera("umd::verification_repofile", undef)
-    $igtf_repo             = hiera("umd::igtf_repo", True)
-    $enable_testing_repo   = hiera("umd::enable_testing_repo", False)
-    $enable_untested_repo  = hiera("umd::enable_untested_repo", False)
+    $igtf_repo             = hiera("umd::igtf_repo", true)
+    $enable_testing_repo   = hiera("umd::enable_testing_repo", false)
+    $enable_untested_repo  = hiera("umd::enable_untested_repo", false)
 
     $release_map = {
         4 => {
