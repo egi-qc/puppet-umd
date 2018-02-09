@@ -131,6 +131,7 @@ class umd::distro::umd {
                 elsif $umd::params::release == "3" {
                     $pkg = "${umd::params::release_map[3][sl6]}"
                 }
+            }
 	    elsif $::operatingsystem == "CentOS" {
                 if $umd::params::release == "4" {
                     $pkg = "${umd::params::release_map[4][centos6]}"
