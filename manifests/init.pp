@@ -123,7 +123,7 @@ class umd::distro::umd {
                     require  => Package["yum-plugin-priorities"]
             }
         }
-        elsif $::operatingsystem == "Scientific" and $::operatingsystemmajrelease == "6" {
+        elsif $::operatingsystem in ["Scientific", "CentOS"]  and $::operatingsystemmajrelease == "6" {
             if $umd::params::release == "4" {
                 $pkg = "${umd::params::release_map[4][sl6]}"
             }
