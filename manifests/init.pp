@@ -3,16 +3,34 @@ class umd (
         $verification_repofile = $umd::params::verification_repofile,
         $igtf_repo             = $umd::params::igtf_repo,
     ) inherits umd::params {
-        if $distribution == "cmd" {
-            contain umd::distro::cmd
-            $req_release = Class["umd::distro::cmd"]
+        if $distribution == "cmd-os" {
+            contain umd::distro::cmd::os
+            $req_release = Class["umd::distro::cmd::os"]
         }
+        #elsif $distribution == "cmd-one" {
+        #    contain umd::distro::cmd::one
+        #    $req_release = Class["umd::distro::cmd::one"]
+        #}
         elsif $distribution == "umd" {
             contain umd::distro::umd
             $req_release = Class["umd::distro::umd"]
         }
         else {
             fail("UMD distribution '${distribution}' not known!")
+        }
+
+        $ojete = "calor"
+        if $::osfamily in ["RedHat"] {
+            if $::operatingsystemmajrelease == "5" {
+                $yum_prio_pkg = "yum-priorities"
+            }
+            else {
+                $yum_prio_pkg = "yum-plugin-priorities"
+            }
+            package {
+                $yum_prio_pkg:
+                    ensure => installed
+            }
         }
 
         if $igtf_repo {
@@ -61,109 +79,130 @@ class umd (
         contain umd::verification::repo
 }
 
-class umd::distro::cmd {
-        if $umd::params::release == 1 {
-            $openstack_release = "mitaka"
+class umd::distro::cmd::os {
+    $release = $umd::params::release ? {
+        undef   => "${umd::params::release_map[cmd-os][current]}",
+        default => $umd::params::release,
+    }
+    if $release == 1 {
+        $openstack_release = "mitaka"
+    }
+    else {
+        fail("CMD-OS release '${release}' not supported!")
+    }
+
+    if $::operatingsystem == "CentOS" and $::operatingsystemmajrelease == "7" {
+        exec {
+            "cmd-release":
+                command => "/usr/bin/yum localinstall -y ${umd::params::release_map[cmd-os][1][centos7]}",
+                require  => Package["yum-plugin-priorities"]
+        }
+        # FIXME Workaround for mitaka
+        if $openstack_release == "mitaka" {
+            exec {
+                "centos-release-openstack-mitaka":
+                    command => "/usr/bin/yum localinstall -y http://linuxsoft.cern.ch/cern/centos/7/cern/x86_64/Packages/centos-release-openstack-mitaka-1-2.el7.cern.noarch.rpm"
+            }
         }
         else {
-            fail("CMD release '${umd::params::release}' not supported!")
-        }
-
-        if $::operatingsystem == "CentOS" and $::operatingsystemmajrelease == "7" {
             package {
                 "centos-release-openstack-${openstack_release}":
                     ensure => installed
             }
         }
-        elsif $::operatingsystem == "Ubuntu" and $::operatingsystemrelease in ["14.04", "16.04"] {
-            if $openstack_release != "mitaka" {
-                package {
-                    "software-properties-common":
-                        ensure => installed,
-                }
-                exec {
-                    "add cloud-archive:${openstack_release} repository":
-                        command => "/usr/bin/add-apt-repository -y cloud-archive:${openstack_release}",
-                        creates => "${umd::params::repo_sources_dir}/cloudarchive-${openstack_release}.list",
-                        require => Package["software-properties-common"]
-                }
+    }
+    elsif $::operatingsystem == "Ubuntu" and $::operatingsystemrelease in ["14.04", "16.04"] {
+        if $::operatingsystemrelease in ["16.04"] {
+            $pkg = "${umd::params::release_map[cmd-os][1][ubuntu16]}"
+        }
+        elsif $::operatingsystemrelease in ["14.04"] {
+            $pkg = "${umd::params::release_map[cmd-os][1][ubuntu14]}"
+        }
+        package {
+            "umd-release":
+                provider => "dpkg",
+                ensure   => installed,
+                source   => "$pkg",
+        }
+        if $openstack_release != "mitaka" {
+            package {
+                "software-properties-common":
+                    ensure => installed,
+            }
+            exec {
+                "add cloud-archive:${openstack_release} repository":
+                    command => "/usr/bin/add-apt-repository -y cloud-archive:${openstack_release}",
+                    creates => "${umd::params::repo_sources_dir}/cloudarchive-${openstack_release}.list",
+                    require => Package["software-properties-common"]
             }
         }
-        else {
-            fail("Operating system ($::operatingsystem, $::operatingsystemrelease) not supported!")
-        }
+    }
+    else {
+        fail("Operating system ($::operatingsystem, $::operatingsystemrelease) not supported!")
+    }
 }
 
 class umd::distro::umd {
-        if $::osfamily in ["RedHat"] {
-            package {
-                "epel-release":
-                    ensure => latest,
-            }
-            
-            package {
-                "yum-plugin-priorities":
-                    ensure => installed
-            }
+    if $::osfamily in ["RedHat"] {
+        package {
+            "epel-release":
+                ensure => latest,
         }
+    }
   
-        if $::operatingsystem == "CentOS" and $::operatingsystemmajrelease == "7" {
-            if $umd::params::release == "4" {
-                $pkg = "${umd::params::release_map[4][centos7]}"
-            }
-            elsif $umd::params::release == "3" {
-                $pkg = "${umd::params::release_map[3][centos7]}"
-            }
+    if $::operatingsystem == "CentOS" and $::operatingsystemmajrelease == "7" {
+        if $umd::params::release == "4" {
+            $pkg = "${umd::params::release_map[umd][4][centos7]}"
+        }
+        elsif $umd::params::release == "3" {
+            $pkg = "${umd::params::release_map[umd][3][centos7]}"
+        }
 
-            package {
-                "umd-release":
-                    provider => "rpm",
-                    ensure   => installed,
-                    source   => $pkg,
-                    require  => Package["yum-plugin-priorities"]
+        package {
+            "umd-release":
+                provider => "rpm",
+                ensure   => installed,
+                source   => $pkg,
+                require  => Package[$yum_prio_pkg]
+        }
+    }
+    elsif $::operatingsystem in ["Scientific", "CentOS"]  and $::operatingsystemmajrelease == "6" {
+        if $::operatingsystem == "Scientific" {
+            if $umd::params::release in [4, "4"] {
+                $pkg = "${umd::params::release_map[umd][4][sl6]}"
+            }
+            if $umd::params::release in [3, "3"] {
+                $pkg = "${umd::params::release_map[umd][3][sl6]}"
             }
         }
-        elsif $::operatingsystem in ["Scientific", "CentOS"]  and $::operatingsystemmajrelease == "6" {
-            if $::operatingsystem == "Scientific" {
-                if $umd::params::release in [4, "4"] {
-                    $pkg = "${umd::params::release_map[4][sl6]}"
-                }
-                if $umd::params::release in [3, "3"] {
-                    $pkg = "${umd::params::release_map[3][sl6]}"
-                }
+        elsif $::operatingsystem == "CentOS" {
+            if $umd::params::release in [4, "4"] {
+                $pkg = "${umd::params::release_map[umd][4][centos6]}"
             }
-	    elsif $::operatingsystem == "CentOS" {
-                if $umd::params::release in [4, "4"] {
-                    $pkg = "${umd::params::release_map[4][centos6]}"
-                }
-                elsif $umd::params::release in [3, "3"] {
-                    $pkg = "${umd::params::release_map[3][centos6]}"
-                }
-            }
-            package {
-                "umd-release":
-                    provider => "rpm",
-                    ensure   => installed,
-                    source   => "$pkg",
-                    require  => Package["yum-plugin-priorities"]
+            elsif $umd::params::release in [3, "3"] {
+                $pkg = "${umd::params::release_map[umd][3][centos6]}"
             }
         }
-        elsif $::operatingsystem == "Scientific" and $::operatingsystemmajrelease == "5" {
-            package {
-                "yum-priorities":
-                    ensure => installed
-            }
-            package {
-                "umd-release":
-                    provider => "rpm",
-                    ensure   => installed,
-                    source   => "${umd::params::release_map[3][sl5]}",
-                    require  => Package["yum-priorities"]
-            }
+        package {
+            "umd-release":
+                provider => "rpm",
+                ensure   => installed,
+                source   => "$pkg",
+                require  => Package[$yum_prio_pkg]
         }
-        else {
-            fail("Operating system ${::operatingsystem} (release: ${::operatingsystemrelease} not supported!")
+    }
+    elsif $::operatingsystem == "Scientific" and $::operatingsystemmajrelease == "5" {
+        package {
+            "umd-release":
+                provider => "rpm",
+                ensure   => installed,
+                source   => "${umd::params::release_map[umd][3][sl5]}",
+                require  => Package[$yum_prio_pkg]
         }
+    }
+    else {
+        fail("Operating system ${::operatingsystem} (release: ${::operatingsystemrelease} not supported!")
+    }
 }
 
 class umd::verification::repo {
