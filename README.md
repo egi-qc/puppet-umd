@@ -1,29 +1,74 @@
-# puppet-umd module
+# puppet-umd
 
-This module will deploy the required repositories in order to perform an UMD software
-validation.
+This Puppet module deploys [EGI](https://www.egi.eu/)'s UMD and/or CMD software
+distribution repositories, residing at http://repository.egi.eu.
 
 ## Installation
+### From [PuppetForge](https://forge.puppet.com/)
+    puppet module install egiqc/umd
+### With [librarian-puppet](http://librarian-puppet.com/) tool
+    cat <<EOF >>Puppetfile
+    #!/usr/bin/env ruby
+    forge "https://forgeapi.puppetlabs.com"
+    mod "egiqc/umd"
 
-    wget https://github.com/egi-qc/puppet-umd/archive/master.zip -O /tmp/puppet-umd-<VERSION>.tar.gz
-    puppet module install --ignore-dependencies /tmp/puppet-umd-<VERSION>.tar.gz
-    puppet module install puppetlabs/stdlib
+or using the repository directly:
+
+    cat <<EOF >>Puppetfile
+    #!/usr/bin/env ruby
+    forge "https://forgeapi.puppetlabs.com"
+    mod "egi-qc/umd", :git => "git://github.com/egi-qc/puppet-umd.git"
 
 ## Usage
+Simplest-case scenario would be to provide the `distribution` parameter and
+leave anything else as defaults. This one-liner does the job:
+
+    puppet apply -e 'class {"umd": distribution => "umd"}'
+
+The module will take the latest production release version for the selected
+distribution. Otherwise, the release version could be passed with the
+`release` variable:
 
     class {
         "umd":
-            release               => 4,
-            verification_repofile => "http://admin-repo.egi.eu/sw/unverified/cmd-os-1.ifca.occi.ubuntu-trusty.amd64/0/3/2/repofiles/IFCA.occi.ubuntu-trusty.amd64.list",
-            openstack_release     => "mitaka",
+            distribution => "umd",
+            release => 4,
     }
 
-Parameters are self-explanatory. Note that `verification_repofile` must point to a valid YUM or APT source file.
+### Available repositories
+The repositories enabled by default are:
+  - base
+  - updates
 
-For running this module programatically, like it is being done by the 
-`umd-verification` application, the best approach is to pass the `umd`
-class parameters through hiera. See an example below:
+The rest of available repositories are:
+  - testing
+  - untested
 
-    umd::release: 4
-    umd::verification::repofile: http://admin-repo.egi.eu/sw/unverified/cmd-os-1.ifca.occi.ubuntu-trusty.amd64/0/3/2/repofiles/IFCA.occi.ubuntu-trusty.amd64.list
-    umd::openstack_release: mitaka
+which can be enabled with `enable_testing_repo`and `enable_untested_repo`,
+respectively.
+
+### Extra repositories (verification)
+[EGI Software Provisioning process](https://wiki.egi.eu/wiki/Software_Provisioning_Process)
+uses this module for the software product's verification. Consequently, there
+is the possibility of providing extra repositories with `verification_repofile`
+parameter, as happen to be the verification one. Note that
+`verification_repofile` must point to a valid YUM or APT source file:
+
+    class {
+        "umd":
+            distribution => "umd",
+            release => 4,
+            verification_repofile => "http://admin-repo.egi.eu/sw/unverified/cmd-os-1.ifca.occi.ubuntu-trusty.amd64/0/3/2/repofiles/IFCA.occi.ubuntu-trusty.amd64.list"
+    }
+### EGI IGTF
+This module is also able to deploy the [EGI IGTF release](https://wiki.egi.eu/wiki/EGI_IGTF_Release),
+containing the trusted set of certification authorities in the EGI
+infrastructure. By default, the EGI IGTF repository is deployed and the trusted
+CAs are installed. To disable this feature:
+
+    class {
+        "umd":
+            distribution => "umd",
+            igtf_repo => false,
+    }
+
