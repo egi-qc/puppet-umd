@@ -7,6 +7,8 @@ distribution repositories, residing at http://repository.egi.eu.
 ### From [PuppetForge](https://forge.puppet.com/)
     puppet module install egiqc/umd
 ### With [librarian-puppet](http://librarian-puppet.com/) tool
+An example of Puppetfile:
+
     cat <<EOF >>Puppetfile
     #!/usr/bin/env ruby
     forge "https://forgeapi.puppetlabs.com"
@@ -18,6 +20,10 @@ or using the repository directly:
     #!/usr/bin/env ruby
     forge "https://forgeapi.puppetlabs.com"
     mod "egi-qc/umd", :git => "git://github.com/egi-qc/puppet-umd.git"
+
+Once in the Puppetfile's root path, run:
+
+    librarian-puppet install --clean
 
 ## Usage
 Simplest-case scenario would be to provide the `distribution` parameter and
