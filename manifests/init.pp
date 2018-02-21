@@ -195,7 +195,7 @@ class umd::distro::umd {
                 provider => "rpm",
                 ensure   => installed,
                 source   => "$pkg",
-                require  => Package["yum-priorities"]
+                require  => Package["yum-plugin-priorities"]
         }
     }
     elsif $::operatingsystem == "Scientific" and $::operatingsystemmajrelease == "5" {
