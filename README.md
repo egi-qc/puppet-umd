@@ -31,8 +31,12 @@ leave anything else as defaults. This one-liner does the job:
 
     puppet apply -e 'class {"umd": distribution => "umd"}'
 
-The module will take the latest production release version for the selected
-distribution. Otherwise, the release version could be passed with the
+Supported distributions are:
+  - `umd` for the UMD repository
+  - `cmd-os` for the OpenStack CMD repository
+
+The module will take by default the latest production release version for the
+selected distribution. Otherwise, the release version could be passed with the
 `release` variable:
 
     class {
