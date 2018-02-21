@@ -19,7 +19,6 @@ class umd (
             fail("UMD distribution '${distribution}' not known!")
         }
 
-        $ojete = "calor"
         if $::osfamily in ["RedHat"] {
             if $::operatingsystemmajrelease == "5" {
                 $yum_prio_pkg = "yum-priorities"
