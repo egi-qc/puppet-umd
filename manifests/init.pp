@@ -79,10 +79,12 @@ class umd (
 }
 
 class umd::distro::cmd::os {
-    $release = $umd::params::release ? {
+    $release_str = $umd::params::release ? {
         undef   => "${umd::params::release_map[cmd-os][current]}",
         default => $umd::params::release,
     }
+    $release = 0 + $release_str
+
     if $release == 1 {
         $openstack_release = "mitaka"
     }
@@ -142,6 +144,12 @@ class umd::distro::cmd::os {
 }
 
 class umd::distro::umd {
+    $release_str = $umd::params::release ? {
+        undef   => "${umd::params::release_map[umd][current]}",
+        default => $umd::params::release,
+    }
+    $release = 0 + $release_str
+
     if $::osfamily in ["RedHat"] {
         package {
             "epel-release":
@@ -150,10 +158,10 @@ class umd::distro::umd {
     }
   
     if $::operatingsystem == "CentOS" and $::operatingsystemmajrelease == "7" {
-        if $umd::params::release == "4" {
+        if $release == 4 {
             $pkg = "${umd::params::release_map[umd][4][centos7]}"
         }
-        elsif $umd::params::release == "3" {
+        elsif $release == 3 {
             $pkg = "${umd::params::release_map[umd][3][centos7]}"
         }
 
@@ -162,23 +170,23 @@ class umd::distro::umd {
                 provider => "rpm",
                 ensure   => installed,
                 source   => $pkg,
-                require  => Package[$yum_prio_pkg]
+                require  => Package["yum-plugin-priorities"]
         }
     }
     elsif $::operatingsystem in ["Scientific", "CentOS"]  and $::operatingsystemmajrelease == "6" {
         if $::operatingsystem == "Scientific" {
-            if $umd::params::release in [4, "4"] {
+            if $release == 4 {
                 $pkg = "${umd::params::release_map[umd][4][sl6]}"
             }
-            if $umd::params::release in [3, "3"] {
+            if $release == 3 {
                 $pkg = "${umd::params::release_map[umd][3][sl6]}"
             }
         }
         elsif $::operatingsystem == "CentOS" {
-            if $umd::params::release in [4, "4"] {
+            if $release == 4 {
                 $pkg = "${umd::params::release_map[umd][4][centos6]}"
             }
-            elsif $umd::params::release in [3, "3"] {
+            elsif $release == 3 {
                 $pkg = "${umd::params::release_map[umd][3][centos6]}"
             }
         }
@@ -187,7 +195,7 @@ class umd::distro::umd {
                 provider => "rpm",
                 ensure   => installed,
                 source   => "$pkg",
-                require  => Package[$yum_prio_pkg]
+                require  => Package["yum-priorities"]
         }
     }
     elsif $::operatingsystem == "Scientific" and $::operatingsystemmajrelease == "5" {
@@ -196,7 +204,7 @@ class umd::distro::umd {
                 provider => "rpm",
                 ensure   => installed,
                 source   => "${umd::params::release_map[umd][3][sl5]}",
-                require  => Package[$yum_prio_pkg]
+                require  => Package["yum-priorities"]
         }
     }
     else {
