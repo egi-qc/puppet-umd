@@ -1,6 +1,6 @@
 {
-  "name": "puppet-umd",
-  "version": "1.0",
+  "name": "egiqc/umd",
+  "version": "1.0.0",
   "author": "Pablo Orviz <orviz@ifca.unican.es>",
   "summary": "Puppet module for setting up UMD and CMD repositories http://repository.egi.eu",
   "license": "Apache-2.0",
