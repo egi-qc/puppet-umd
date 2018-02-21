@@ -5,7 +5,9 @@ distribution repositories, residing at http://repository.egi.eu.
 
 ## Installation
 ### From [PuppetForge](https://forge.puppet.com/)
+
     puppet module install egiqc/umd
+
 ### With [librarian-puppet](http://librarian-puppet.com/) tool
 An example of Puppetfile:
 
