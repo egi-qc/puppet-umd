@@ -2,6 +2,7 @@ class umd (
         $distribution          = $umd::params::distribution,
         $verification_repofile = $umd::params::verification_repofile,
         $igtf_repo             = $umd::params::igtf_repo,
+        $fetch_crl             = $umd::params::fetch_crl,
     ) inherits umd::params {
         if $distribution == "cmd-os" {
             contain umd::distro::cmd::os
@@ -53,7 +54,9 @@ class umd (
                     ensure  => latest,
                     require => $req_igtf, 
             }
-            include umd::igtf_repo::fetchcrl
+            if $fetch_crl {
+                include umd::igtf_repo::fetchcrl
+            }
         }
 
         if $enable_testing_repo {

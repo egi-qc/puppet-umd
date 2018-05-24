@@ -27,10 +27,8 @@ class umd::igtf_repo::apt {
 }
 
 class umd::igtf_repo::fetchcrl {
-    if $fetch_crl {
-        package {
-            "fetch-crl":
-                ensure => latest
-        }
+    package {
+        "fetch-crl":
+            ensure => latest
     }
 }
