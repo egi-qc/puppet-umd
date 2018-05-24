@@ -53,6 +53,7 @@ class umd (
                     ensure  => latest,
                     require => $req_igtf, 
             }
+            include umd::igtf_repo::fetchcrl
         }
 
         if $enable_testing_repo {

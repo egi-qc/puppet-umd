@@ -3,6 +3,7 @@ class umd::params {
     $release               = hiera("umd::release", undef)
     $verification_repofile = hiera("umd::verification_repofile", undef)
     $igtf_repo             = hiera("umd::igtf_repo", true)
+    $fetch_crl             = hiera("umd::fetch_crl", true)
     $enable_testing_repo   = hiera("umd::enable_testing_repo", false)
     $enable_untested_repo  = hiera("umd::enable_untested_repo", false)
 

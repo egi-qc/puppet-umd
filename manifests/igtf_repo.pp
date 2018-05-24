@@ -25,3 +25,12 @@ class umd::igtf_repo::apt {
             require  => Apt::Key["EUGridPMA"]
     }
 }
+
+class umd::igtf_repo::fetchcrl {
+    if $fetch_crl {
+        package {
+            "fetch-crl":
+                ensure => latest
+        }
+    }
+}
