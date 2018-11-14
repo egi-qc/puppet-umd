@@ -20,7 +20,13 @@ class umd (
             fail("UMD distribution '${distribution}' not known!")
         }
 
-        if $::osfamily in ["RedHat"] {
+        if $::osfamily in ["RedHat", "CentOS"] {
+            package {
+                "yum-utils":
+                    ensure => installed,
+            }
+            $req = Package["yum-utils"]
+
             if $::operatingsystemmajrelease == "5" {
                 $yum_prio_pkg = "yum-priorities"
             }
@@ -39,12 +45,6 @@ class umd (
                 $req_igtf = Class["Umd::igtf_repo::apt"]
             }
             elsif $::osfamily in ["RedHat", "CentOS"] {
-                package {
-                    "yum-utils":
-                        ensure => installed,
-                }
-		$req = Package["yum-utils"]
-
                 include umd::igtf_repo::yum
                 $req_igtf = Class["Umd::igtf_repo::yum"]
             }
